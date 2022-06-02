@@ -1,5 +1,15 @@
 # AV2 - Programação Estruturada
 
+**Colaboradores:**
+
+@Anttonino
+
+@f0xxhound
+
+@Theusonho
+
+@wajardim
+
 ## APS1
 Faça um programa, utilizando o Dev-C++, para armazenar os dados de um aluno(a), contendo os seguintes dados:
 
