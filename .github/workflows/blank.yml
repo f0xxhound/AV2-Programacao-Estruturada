@@ -1,0 +1,765 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include <string.h>
+#include <locale.h>
+#define MAX_FUNC 50
+// CPF: inteiro
+//nome: caractere
+// sexo: caractere
+// idade: inteiro
+// horas trabalhadas: real
+//valor hora trabalhada: real
+//salário líquido: real
+
+using namespace std;
+
+typedef struct{
+
+	char nome[50], sexo[10];
+	float salario[2], saliq;
+	int idade, cpf, ativo;
+
+}funcionario;
+
+funcionario funcionarios[MAX_FUNC];
+int total = 0;
+
+void menu();
+void cadastrar();
+void pesquisar();
+void menu_lista();
+void tds_alunos();
+void media();
+void aprovados();
+void aprovados_7();
+void aprovados_9();
+void reprovados_7();
+void reprovados_5();
+void salvar();
+void menu_arq();
+void carregar();
+void remover();
+
+main(){
+	
+	setlocale(LC_ALL, "Portuguese");
+		
+	menu();
+		
+	return 0;
+}
+
+void menu(){
+
+	int op;
+	
+	do{
+		system("cls");
+		cout<<"Armazenamento de Funcionarios"<<endl;
+		cout<<endl<<"1 - Cadastrar Funcionario"<<endl;
+		cout<<"2 - Pesquisar Funcionario"<<endl;
+		cout<<"3 - Listar Funcionarios"<<endl;
+		cout<<"4 - Remover Funcionario"<<endl;
+		cout<<"5 - Salvar/Carregar arquivo externo"<<endl;
+		
+		cout<<"0 - Encerrar o Programa"<<endl<<endl;
+		cout<<"Comando: "; cin>>op;
+		getchar();
+		
+		switch(op){
+			case 1:
+				cadastrar();
+			break;
+				
+			case 2:
+				pesquisar();
+			break;
+				
+			case 3:
+				menu_lista();
+			break;
+			
+			case 5:
+				menu_arq();
+			break;
+			
+			case 0:
+				exit(0);
+			break;
+			
+			default:
+			cout<<endl<<"Error! Comando inválido!"<<endl;
+			system("pause");
+			menu();
+			break;
+		}
+		
+			getchar();
+		
+	}while(op!=0);
+
+}
+
+void remover(){
+
+}
+
+
+void cadastrar(){
+	
+	system("cls");
+
+	char nome[50], sexo[10];
+	float salario[2], saliq;
+    int cpf, idade, ativo, op;
+	do{
+		cout<<endl<<"---Cadastro De Funcionario---"<<endl;
+		cout<<endl<<"Nome: ";gets(nome); 
+		cout<<endl<<"CPF: ";cin>>cpf;
+		cout<<endl<<"Idade: ";cin>>idade;
+		cout<<endl<<"Sexo: ";cin>>sexo;
+		cout<<endl<<"Horas trabalhadas: ";cin>>salario[0];
+		cout<<endl<<"Valor hora trabalhada: ";cin>>salario[1];
+
+		
+		for(int i=0;i<MAX_FUNC; i++){
+			if(funcionarios[i].ativo==0){
+				funcionarios[i].salario[0] = salario[0];
+				funcionarios[i].salario[1] = salario[1];
+				funcionarios[i].cpf = cpf;
+				funcionarios[i].idade = idade;
+				strcpy(funcionarios[i].nome, nome);
+				strcpy(funcionarios[i].sexo, sexo);
+				funcionarios[i].ativo=1;
+				total ++;
+				break;
+			}
+		}
+		cout<<endl<<"Parabéns! Funcionario cadastrado com sucesso!"<<endl;
+		cout<<endl<<"1 - Continuar"<<endl;
+		cout<<"0 - Menu Principal"<<endl; 
+		cout<<endl<<"Comando: ";cin>>op;
+		getchar();
+		
+		switch(op){
+			case 0:
+				menu();
+			break;
+			
+			case 1:
+				cadastrar();
+			break;
+			
+			default:
+			cout<<endl<<"Error! Comando inválido!"<<endl;
+			system("pause");
+			menu();
+			break;
+		}
+	}while(op!=0 && total<MAX_ALUNOS);
+getchar();
+
+}
+
+void salvar(){
+	char name[10]; 
+	media();
+	
+	FILE* arq;
+	
+	cout<<endl<<"Informe o nome para o arquivo: "; cin>>name; strcat(name,".txt");
+	if((arq=fopen(name,"w"))==NULL){
+		cout<<endl<<"Não foi possível abrir o arquivo"<<endl; exit(1);
+	}else{
+	
+	fprintf (arq,"Total= %d\n",total);
+	
+	for(int i=0;i<total;i++){
+		
+		fprintf (arq, "\nNome= %s",funcionarios[i].nome);
+		fprintf (arq, "\nCPF= %d",funcionarios[i].cpf);	
+		fprintf (arq, "\nSexo= %s",funcionarios[i].sexo);
+		fprintf (arq, "\nIdade= %d",funcionarios[i].idade);
+		fprintf (arq, "\nHoras Trabalhadas= %.1f",funcionarios[i].salario[0]);
+		fprintf (arq, "\nValor hora trabalhadas= %.1f",funcionarios[i].salario[1]);
+		fprintf (arq, "\nSalário Líquido= %.1f",funcionarios[i].saliq);
+	}
+	cout<<endl<<"Arquivo criado com sucesso!"<<endl; fclose(arq);
+	system("pause");
+}
+}
+
+void carregar(){
+	
+ FILE *arq;
+char name[10];
+media();
+   
+	cout<<endl<<"-----------------------------------------------------------------------"<<endl;
+	cout<<"O arquivo que será carregado deve estar no mesmo diretório do sistema"<<endl; 
+	cout<<"-----------------------------------------------------------------------"<<endl;
+   
+   cout<<endl<<"Nome do arquivo a ser carregado: "; cin>>name;
+   arq = fopen(name,"r");
+   if (arq == NULL){
+   	cout<<endl<<"não foi possível carregar o arquivo"<<endl;
+   }else{
+   	    fseek (arq,7,0);
+		fscanf (arq, "%d\n", &total);
+		
+	for(int i=0;i<total;i++){
+		fseek(arq,6,1); fscanf(arq,"%s\n",funcionarios[i].nome);
+		fseek(arq,11,1); fscanf(arq,"%d\n",&funcionarios[i].cpf);
+		fseek(arq,6,1); fscanf(arq,"%s\n",funcionarios[i].sexo);
+		fseek(arq,7,1); fscanf(arq,"%d\n",&funcionarios[i].idade);
+		fseek(arq,5,1); fscanf(arq,"%f\n",&funcionarios[i].salario[0]);
+		fseek(arq,5,1); fscanf(arq,"%f\n",&funcionarios[i].salario[1]);
+		fseek(arq,7,1); fscanf(arq,"%f\n",&funcionarios[i].saliq);
+	}
+   
+}
+fclose(arq);
+    cout<<endl<<"Arquivo carregado com sucesso!"<<endl;
+    system("pause");
+    menu();
+   	
+}
+
+
+void menu_arq(){
+	int op;
+	
+	system("cls");
+	
+	cout<<endl<<"***********Arquivo externo***********"<<endl;
+	cout<<"------------------------------------------------------------"<<endl;
+	cout<<"Lembre-se de salvar ao fim da execução"<<endl; 
+	cout<<"------------------------------------------------------------"<<endl;
+	
+	cout<<endl<<"1 - Salvar arquivo"<<endl;
+	cout<<"2 - Carregar arquivo"<<endl;
+	cout<<"0 - Menu principal"<<endl;
+	cout<<endl<<"Comando: ";	cin>>op;
+	getchar();
+	
+	switch(op){
+		
+		case 1:
+			salvar();
+		break;
+		
+		case 2:
+			carregar();
+		break;
+		
+		case 0:
+			menu();
+		break;
+		
+		default:
+			cout<<endl<<"Error! Comando inválido!"<<endl;
+			system("pause");
+			menu();
+        break;
+	}	
+	
+}
+
+
+void media(){
+
+	int op, ZERO;
+
+	for(int i=0;i<MAX_ALUNOS;i++){
+		
+		if (alunos[i].notas[0]<alunos[i].notas[2] && alunos[i].notas[1]>alunos[i].notas[0]) 
+		{
+		alunos[i].media = (alunos[i].notas[1]+alunos[i].notas[2])/2;
+		}
+		
+		else if (alunos[i].notas[1]<alunos[i].notas[2] && alunos[i].notas[0]>alunos[i].notas[1])
+		{
+		alunos[i].media = (alunos[i].notas[0]+alunos[i].notas[2])/2;	
+		}
+	
+		else if (alunos[i].notas[0]>alunos[i].notas[2] && alunos[i].notas[1]>alunos[i].notas[2])
+		{
+			alunos[i].media = (alunos[i].notas[0]+alunos[i].notas[1])/2;
+		}
+		
+		else if (alunos[i].notas[0]==0 && alunos[i].notas[1]==0 && alunos[i].notas[2]==0)
+		{
+			alunos[i].media = 0;
+		}
+		else if(alunos[i].notas[0] == alunos[i].notas[1] && alunos[i].notas[0] == alunos[i].notas[2])
+		{
+			alunos[i].media = (alunos[i].notas[0]+alunos[i].notas[1])/2;
+		}
+	
+	}
+}
+
+void aprovados(){
+	int op;
+
+	system("cls");
+	media();
+	for(int i=0;i<MAX_ALUNOS;i++){
+		if(alunos[i].media >= 7){
+			cout<<"-------------------------------"<<endl;
+			cout<<"Nome: "<<alunos[i].nome<<endl;
+			cout<<"Matrícula: "<<alunos[i].matricula<<endl;
+			cout<<"Sexo: "<<alunos[i].sexo<<endl;
+			cout<<"Idade: "<<alunos[i].idade<<endl;
+			cout<<"AV1: "<<alunos[i].notas[0]<<endl;
+			cout<<"AV2: "<<alunos[i].notas[1]<<endl;
+			cout<<"AV3: "<<alunos[i].notas[2]<<endl;
+			cout<<"Média: "<<alunos[i].media<<endl;
+			cout<<endl<<"-------------------------------"<<endl<<endl;
+		}
+	}
+	
+	cout<<"1 - Menu de listagem"<<endl;
+	cout<<"0 - Menu principal"<<endl;
+	
+	cout<<"Comando: "; cin>>op; 
+	
+	switch(op){
+		case 1:
+			menu_lista();
+		break;
+		
+		case 0:
+			menu();
+		break;
+		
+		default:
+			cout<<endl<<"Error! Comando inválido!"<<endl;
+			system("pause");
+			menu();
+			break;
+	}
+}
+
+void aprovados_7(){
+	int op;
+	
+	system("cls");
+	media();
+	for(int i=0;i<MAX_ALUNOS;i++){
+		if(alunos[i].media >= 7 && alunos[i].media < 9){
+			cout<<"-------------------------------"<<endl;
+			cout<<"Nome: "<<alunos[i].nome<<endl;
+			cout<<"Matrícula: "<<alunos[i].matricula<<endl;
+			cout<<"Sexo: "<<alunos[i].sexo<<endl;
+			cout<<"Idade: "<<alunos[i].idade<<endl;
+			cout<<"AV1: "<<alunos[i].notas[0]<<endl;
+			cout<<"AV2: "<<alunos[i].notas[1]<<endl;
+			cout<<"AV3: "<<alunos[i].notas[2]<<endl;
+			cout<<"Média: "<<alunos[i].media<<endl;
+			cout<<endl<<"-------------------------------"<<endl<<endl;
+		}
+	}
+
+	cout<<"1 - Menu de listagem"<<endl;
+	cout<<"0 - Menu principal"<<endl;
+	
+	cout<<"Comando: "; cin>>op; 
+	
+	switch(op){
+		case 1:
+			menu_lista();
+		break;
+		
+		case 0:
+			menu();
+		break;
+		
+		default:
+			cout<<endl<<"Error! Comando inválido!"<<endl;
+			system("pause");
+			menu();
+			break;
+	}
+}
+
+void aprovados_9(){
+	int op;
+	
+	system("cls");
+	media();
+	for(int i=0;i<MAX_ALUNOS;i++){
+		if(alunos[i].media >= 9){
+			cout<<"-------------------------------"<<endl;
+			cout<<"Nome: "<<alunos[i].nome<<endl;
+			cout<<"Matrícula: "<<alunos[i].matricula<<endl;
+			cout<<"Sexo: "<<alunos[i].sexo<<endl;
+			cout<<"Idade: "<<alunos[i].idade<<endl;
+			cout<<"AV1: "<<alunos[i].notas[0]<<endl;
+			cout<<"AV2: "<<alunos[i].notas[1]<<endl;
+			cout<<"AV3: "<<alunos[i].notas[2]<<endl;
+			cout<<"Média: "<<alunos[i].media<<endl;
+			cout<<endl<<"-------------------------------"<<endl<<endl;
+		}
+	}
+
+
+	cout<<"1 - Menu de listagem"<<endl;
+	cout<<"0 - Menu principal"<<endl;
+	
+	cout<<"Comando: "; cin>>op; 
+	
+	switch(op){
+		case 1:
+			menu_lista();
+		break;
+		
+		case 0:
+			menu();
+		break;
+		
+		default:
+			cout<<endl<<"Error! Comando inválido!"<<endl;
+			system("pause");
+			menu();
+			break;
+	}
+}
+
+void reprovados(){
+	int op;
+	
+	system("cls");
+	media();
+	
+	for(int i=0;i<MAX_ALUNOS;i++){
+		if(alunos[i].media < 7 && alunos[i].ativo==1){
+			cout<<"-------------------------------"<<endl;
+			cout<<"Nome: "<<alunos[i].nome<<endl;
+			cout<<"Matrícula: "<<alunos[i].matricula<<endl;
+			cout<<"Sexo: "<<alunos[i].sexo<<endl;
+			cout<<"Idade: "<<alunos[i].idade<<endl;
+			cout<<"AV1: "<<alunos[i].notas[0]<<endl;
+			cout<<"AV2: "<<alunos[i].notas[1]<<endl;
+			cout<<"AV3: "<<alunos[i].notas[2]<<endl;
+			cout<<"Média: "<<alunos[i].media<<endl;
+			cout<<endl<<"-------------------------------"<<endl<<endl;
+		}
+	}
+
+	cout<<"1 - Menu de listagem"<<endl;
+	cout<<"0 - Menu principal"<<endl;
+	
+	cout<<"Comando: "; cin>>op; 
+	
+	switch(op){
+		case 1:
+			menu_lista();
+		break;
+		
+		case 0:
+			menu();
+		break;
+		
+		default:
+			cout<<endl<<"Error! Comando inválido! "<<endl;
+			system("pause");
+			menu();
+			break;
+	}
+}
+	
+void reprovados_7(){
+	int op;
+	
+	system("cls");
+	media();
+	
+	for(int i=0;i<MAX_ALUNOS;i++){
+		if(alunos[i].media < 7 && alunos[i].media > 5){
+			cout<<"-------------------------------"<<endl;
+			cout<<"Nome: "<<alunos[i].nome<<endl;
+			cout<<"Matrícula: "<<alunos[i].matricula<<endl;
+			cout<<"Sexo: "<<alunos[i].sexo<<endl;
+			cout<<"Idade: "<<alunos[i].idade<<endl;
+			cout<<"AV1: "<<alunos[i].notas[0]<<endl;
+			cout<<"AV2: "<<alunos[i].notas[1]<<endl;
+			cout<<"AV3: "<<alunos[i].notas[2]<<endl;
+			cout<<"Média: "<<alunos[i].media<<endl;
+			cout<<endl<<"-------------------------------"<<endl<<endl;
+		}
+	}
+
+	cout<<"1 - Menu de listagem"<<endl;
+	cout<<"0 - Menu principal"<<endl;
+	
+	cout<<"Comando: "; cin>>op; 
+	
+	switch(op){
+		case 1:
+			menu_lista();
+		break;
+		
+		case 0:
+			menu();
+		break;
+		
+		default:
+			cout<<endl<<"Error! Comando inválido"<<endl;
+			system("pause");
+			menu();
+			break;
+	}
+}
+
+void reprovados_5(){
+	int op;
+	
+	system("cls");
+	media();
+	
+	for(int i=0;i<MAX_ALUNOS;i++){
+		if(alunos[i].media <= 5 && alunos[i].ativo==1){
+			cout<<"-------------------------------"<<endl;
+			cout<<"Nome: "<<alunos[i].nome<<endl;
+			cout<<"Matrícula: "<<alunos[i].matricula<<endl;
+			cout<<"Sexo: "<<alunos[i].sexo<<endl;
+			cout<<"Idade: "<<alunos[i].idade<<endl;
+			cout<<"AV1: "<<alunos[i].notas[0]<<endl;
+			cout<<"AV2: "<<alunos[i].notas[1]<<endl;
+			cout<<"AV3: "<<alunos[i].notas[2]<<endl;
+			cout<<"Média: "<<alunos[i].media<<endl;
+			cout<<endl<<"-------------------------------"<<endl<<endl;
+		}
+	}
+
+	cout<<"1 - Menu de listagem"<<endl;
+	cout<<"0 - Menu principal"<<endl;
+	
+	cout<<"Comando: "; cin>>op; 
+	
+	switch(op){
+		case 1:
+			menu_lista();
+		break;
+		
+		case 0:
+			menu();
+		break;
+		
+		default:
+			cout<<endl<<"Error! Comando inválido!"<<endl;
+			system("pause");
+			menu();
+		break;
+	}
+	
+}
+	
+void pesquisar(){
+	
+	int matricula, op, local, op1, op2;
+	bool coteli=false;
+	media();
+	
+	system ("cls");
+	
+	cout<<endl<<"***********BUSCA DO ALUNO***********"<<endl;
+	cout<<"------------------------------------------------------------"<<endl;
+	cout<<"A busca deve ser feito pelo número de matrícula do aluno."<<endl; 
+	cout<<"------------------------------------------------------------"<<endl;
+
+cout<<endl<<"Digite a matricula: "; cin>>matricula;
+
+for(int i=0;i<MAX_ALUNOS;i++){
+	if(matricula==alunos[i].matricula){
+		local=i;
+		coteli=true;
+	}
+}
+
+for(int i=0;i<MAX_ALUNOS;i++){
+	if (coteli == true && matricula==alunos[i].matricula && alunos[i].ativo==1) {
+		
+cout<<"-------------------------------"<<endl;
+			cout<<"Nome: "<<alunos[i].nome<<endl;
+			cout<<"Matrícula: "<<alunos[i].matricula<<endl;
+			cout<<"Sexo: "<<alunos[i].sexo<<endl;
+			cout<<"Idade: "<<alunos[i].idade<<endl;
+			cout<<"AV1: "<<alunos[i].notas[0]<<endl;
+			cout<<"AV2: "<<alunos[i].notas[1]<<endl;
+			cout<<"AV3: "<<alunos[i].notas[2]<<endl;
+			cout<<"Média: "<<alunos[i].media<<endl;
+cout<<endl<<"-------------------------------"<<endl<<endl;
+   
+   cout<<endl<<"1 - Nova pesquisa"<<endl;
+	cout<<"0 - Menu Principal"<<endl;
+	cout<<endl<<"Comando: ";	cin>>op;
+	getchar();
+	
+	switch(op){
+		
+		case 1:
+			pesquisar();
+		break;
+		
+		case 0:
+			menu();
+		break;
+		
+		default:
+			cout<<endl<<"Error! Comando inválido!"<<endl;
+			system("pause");
+			menu();
+        break;
+	}	
+
+	} else if (coteli==false && alunos[i].ativo==1){
+	cout<<endl<<"Aluno Não encontrado"<<endl;
+
+cout<<endl<<"Gostaria de cadastra-lo?"<<endl;
+			cout<<endl<<"1 - Sim"<<endl;
+			cout<<"0 - Não"<<endl;
+			
+			cout<<endl<<"Comando: "; cin>>op1;
+			getchar();
+			switch(op1){
+				case 1:
+					cadastrar();
+				break;
+				
+				case 0:
+					cout<<endl<<"Gostaria de continuar pesquisando?"<<endl;
+					cout<<endl<<"1 - Nova pesquisa"<<endl;
+			        cout<<"0 - Sair"<<endl;
+			        cout<<endl<<"Comando: "; cin>>op2;
+			        getchar();
+			switch(op2){
+				case 1:
+					pesquisar();
+			    break;
+			    
+			    case 0:
+			    	menu();
+			    break;
+		}
+					
+	}
+
+	}
+}
+
+}
+
+void menu_lista(){
+	
+	int op_;
+	
+	do{
+		system("cls");
+		cout<<endl<<"*******SITUAÇÃO DOS ALUNOS CADASTRADOS********"<<endl;
+		cout<<"----------------------------------------------------"<<endl;
+	   	cout<<"1 - Todos os Alunos"<<endl;	
+		cout<<"2 - Alunos Aprovados"<<endl;
+		cout<<"3 - Alunos Reprovados"<<endl;
+		cout<<"4 - Alunos reprovados com média inferior a 5"<<endl;
+		cout<<"5 - Alunos reprovados com média inferior a 7"<<endl;
+		cout<<"6 - Alunos aprovados com média superior ou igual a 7"<<endl;
+		cout<<"7 - Alunos aprovados com média superior ou igual a 9"<<endl;
+	
+		cout<<"0 - Sair"<<endl<<endl;
+		cout<<"Comando: "; cin>>op_;
+		getchar();
+		switch(op_){
+			case 1:
+			   tds_alunos();
+			break;
+			
+			case 2:
+				aprovados();
+			break;
+			
+			case 3:
+				reprovados();
+			break;
+			
+			case 4:
+		         reprovados_5();
+		    break;
+		    
+		    case 5:
+		    	reprovados_7();
+		    break;
+		    
+		    case 6:
+		    	aprovados_7();
+		    break;
+		    
+		    case 7:
+		    	aprovados_9();
+		    break;
+		    
+			case 0:
+				menu();
+			break;
+			
+			default:
+			cout<<endl<<"Error! Comando inválido"<<endl;
+			system("pause");
+			menu();
+			break;
+		}
+	}while(op_!=0);
+
+}
+
+void tds_alunos(){
+	
+	int op;
+	
+	system("cls");
+	media();
+	
+	cout<<endl<<"***********LISTA DE ALUNOS CADASTRADOS***********"<<endl;
+		cout<<"-------------------------------"<<endl;
+    cout<<"Total de alunos: "<<total<<endl;
+    	cout<<"-------------------------------"<<endl;
+
+	for(int i=0;i<MAX_ALUNOS;i++){
+		if(alunos[i].ativo==1){
+			cout<<"-------------------------------"<<endl;
+			cout<<"Nome: "<<alunos[i].nome<<endl;
+			cout<<"Matrícula: "<<alunos[i].matricula<<endl;
+			cout<<"Sexo: "<<alunos[i].sexo<<endl;
+			cout<<"Idade: "<<alunos[i].idade<<endl;
+			cout<<"AV1: "<<alunos[i].notas[0]<<endl;
+			cout<<"AV2: "<<alunos[i].notas[1]<<endl;
+			cout<<"AV3: "<<alunos[i].notas[2]<<endl;
+			cout<<"Média: "<<alunos[i].media<<endl;
+			cout<<endl<<"-------------------------------"<<endl<<endl;
+		}
+	}
+	
+	cout<<endl<<"1 - Menu de listagem"<<endl;
+	cout<<"0 - Menu principal"<<endl;
+	
+	
+	cout<<endl<<"Comando: "; cin>>op; 
+	
+	switch(op){
+		case 1:
+			menu_lista();
+		break;
+		
+		case 0:
+			menu();
+		break;
+		
+		default:
+			cout<<endl<<"Error! Comando inválido"<<endl;
+			system("pause");
+			menu();
+		break;
+	}
+}
