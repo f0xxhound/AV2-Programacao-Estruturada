@@ -4,38 +4,32 @@
 #include <string.h>
 #include <locale.h>
 #define MAX_FUNC 50
-// CPF: inteiro
-//nome: caractere
-// sexo: caractere
-// idade: inteiro
-// horas trabalhadas: real
-//valor hora trabalhada: real
-//salário líquido: real
 
 using namespace std;
 
 typedef struct{
 
 	char nome[50], sexo[10];
-	float salario[2], saliq;
+	float horas_trab, val_hora, sal_bruto=horas_trab*val_hora, saliq; //horas trabalhadas, valor da hora trabalhada, salário bruto, salário líquido
 	int idade, cpf, ativo;
 
 }funcionario;
 
-funcionario funcionarios[MAX_FUNC];
+funcionario func[MAX_FUNC];
 int total = 0;
 
 void menu();
 void cadastrar();
 void pesquisar();
 void menu_lista();
-void tds_alunos();
-void media();
-void aprovados();
-void aprovados_7();
-void aprovados_9();
-void reprovados_7();
-void reprovados_5();
+void tds_func();
+void saliq();
+void sal_inf_500();
+void sal_inf_1k();
+void sal_sup_4k();
+void sal_sup_igual_5k();
+void sal_sup_igual_7k();
+void sal_sup_igual_10k();
 void salvar();
 void menu_arq();
 void carregar();
@@ -56,11 +50,11 @@ void menu(){
 	
 	do{
 		system("cls");
-		cout<<"Armazenamento de Funcionarios"<<endl;
-		cout<<endl<<"1 - Cadastrar Funcionario"<<endl;
-		cout<<"2 - Pesquisar Funcionario"<<endl;
-		cout<<"3 - Listar Funcionarios"<<endl;
-		cout<<"4 - Remover Funcionario"<<endl;
+		cout<<"Armazenamento de Funcionários"<<endl;
+		cout<<endl<<"1 - Cadastrar Funcionário"<<endl;
+		cout<<"2 - Pesquisar Funcionário"<<endl;
+		cout<<"3 - Listar Funcionários"<<endl;
+		cout<<"4 - Remover Funcionário"<<endl;
 		cout<<"5 - Salvar/Carregar arquivo externo"<<endl;
 		
 		cout<<"0 - Encerrar o Programa"<<endl<<endl;
@@ -80,6 +74,10 @@ void menu(){
 				menu_lista();
 			break;
 			
+			case 4:
+				remover();
+			break;
+			
 			case 5:
 				menu_arq();
 			break;
@@ -94,11 +92,8 @@ void menu(){
 			menu();
 			break;
 		}
-		
-			getchar();
-		
+		getchar();
 	}while(op!=0);
-
 }
 
 void remover(){
@@ -107,39 +102,42 @@ void remover(){
 
 
 void cadastrar(){
-	
+
 	system("cls");
 
 	char nome[50], sexo[10];
-	float salario[2], saliq;
+	float horas_trab, val_hora, sal_bruto, saliq;
     int cpf, idade, ativo, op;
+	
 	do{
-		cout<<endl<<"---Cadastro De Funcionario---"<<endl;
-		cout<<endl<<"Nome: ";gets(nome); 
-		cout<<endl<<"CPF: ";cin>>cpf;
-		cout<<endl<<"Idade: ";cin>>idade;
-		cout<<endl<<"Sexo: ";cin>>sexo;
-		cout<<endl<<"Horas trabalhadas: ";cin>>salario[0];
-		cout<<endl<<"Valor hora trabalhada: ";cin>>salario[1];
-
+		cout<<endl<<"---Cadastro de Funcionário---"<<endl;
+		cout<<endl<<"Nome: ";	gets(nome); 
+		cout<<endl<<"CPF: ";	cin>>cpf;
+		cout<<endl<<"Idade: ";	cin>>idade;
+		cout<<endl<<"Sexo: ";	cin>>sexo;
+		cout<<endl<<"Horas trabalhadas: ";	cin>>horas_trab;
+		cout<<endl<<"Valor da hora trabalhada: ";	cin>>val_hora;
 		
+		sal_bruto=horas_trab*val_hora;
+
 		for(int i=0;i<MAX_FUNC; i++){
-			if(funcionarios[i].ativo==0){
-				funcionarios[i].salario[0] = salario[0];
-				funcionarios[i].salario[1] = salario[1];
-				funcionarios[i].cpf = cpf;
-				funcionarios[i].idade = idade;
-				strcpy(funcionarios[i].nome, nome);
-				strcpy(funcionarios[i].sexo, sexo);
-				funcionarios[i].ativo=1;
+			if(func[i].ativo==0){
+				func[i].horas_trab = horas_trab;
+				func[i].val_hora = val_hora;
+				func[i].sal_bruto = sal_bruto;
+				func[i].cpf = cpf;
+				func[i].idade = idade;
+				strcpy(func[i].nome, nome);
+				strcpy(func[i].sexo, sexo);
+				func[i].ativo=1;
 				total ++;
 				break;
 			}
 		}
-		cout<<endl<<"Parabéns! Funcionario cadastrado com sucesso!"<<endl;
-		cout<<endl<<"1 - Continuar"<<endl;
+		cout<<endl<<"Parabéns! Funcionário cadastrado com sucesso!"<<endl;
+		cout<<endl<<"1 - Cadastrar novo funcionário"<<endl;
 		cout<<"0 - Menu Principal"<<endl; 
-		cout<<endl<<"Comando: ";cin>>op;
+		cout<<endl<<"Comando: ";	cin>>op;
 		getchar();
 		
 		switch(op){
@@ -157,14 +155,13 @@ void cadastrar(){
 			menu();
 			break;
 		}
-	}while(op!=0 && total<MAX_ALUNOS);
-getchar();
-
+	}while(op!=0 && total<MAX_FUNC);
+	getchar();
 }
 
 void salvar(){
 	char name[10]; 
-	media();
+	saliq();
 	
 	FILE* arq;
 	
@@ -176,50 +173,48 @@ void salvar(){
 	fprintf (arq,"Total= %d\n",total);
 	
 	for(int i=0;i<total;i++){
-		
-		fprintf (arq, "\nNome= %s",funcionarios[i].nome);
-		fprintf (arq, "\nCPF= %d",funcionarios[i].cpf);	
-		fprintf (arq, "\nSexo= %s",funcionarios[i].sexo);
-		fprintf (arq, "\nIdade= %d",funcionarios[i].idade);
-		fprintf (arq, "\nHoras Trabalhadas= %.1f",funcionarios[i].salario[0]);
-		fprintf (arq, "\nValor hora trabalhadas= %.1f",funcionarios[i].salario[1]);
-		fprintf (arq, "\nSalário Líquido= %.1f",funcionarios[i].saliq);
+		fprintf (arq, "\nNome= %s",func[i].nome);
+		fprintf (arq, "\nCPF= %d",func[i].cpf);	
+		fprintf (arq, "\nSexo= %s",func[i].sexo);
+		fprintf (arq, "\nIdade= %d",func[i].idade);
+		fprintf (arq, "\nHoras Trabalhadas= %.1f",func[i].horas_trab);
+		fprintf (arq, "\nValor da hora trabalhada= %.1f",func[i].val_hora);
+		fprintf (arq, "\nSalário Líquido= %.1f",func[i].saliq);
 	}
 	cout<<endl<<"Arquivo criado com sucesso!"<<endl; fclose(arq);
 	system("pause");
-}
+	}
 }
 
 void carregar(){
 	
- FILE *arq;
-char name[10];
-media();
-   
+	FILE *arq;
+	char name[10];
+	saliq();
+	
 	cout<<endl<<"-----------------------------------------------------------------------"<<endl;
 	cout<<"O arquivo que será carregado deve estar no mesmo diretório do sistema"<<endl; 
 	cout<<"-----------------------------------------------------------------------"<<endl;
    
-   cout<<endl<<"Nome do arquivo a ser carregado: "; cin>>name;
-   arq = fopen(name,"r");
-   if (arq == NULL){
-   	cout<<endl<<"não foi possível carregar o arquivo"<<endl;
-   }else{
-   	    fseek (arq,7,0);
+	cout<<endl<<"Nome do arquivo a ser carregado: "; cin>>name;
+	arq = fopen(name,"r");
+	if (arq == NULL){
+		cout<<endl<<"Não foi possível carregar o arquivo"<<endl;
+	}else{
+	    fseek (arq,7,0);
 		fscanf (arq, "%d\n", &total);
 		
-	for(int i=0;i<total;i++){
-		fseek(arq,6,1); fscanf(arq,"%s\n",funcionarios[i].nome);
-		fseek(arq,11,1); fscanf(arq,"%d\n",&funcionarios[i].cpf);
-		fseek(arq,6,1); fscanf(arq,"%s\n",funcionarios[i].sexo);
-		fseek(arq,7,1); fscanf(arq,"%d\n",&funcionarios[i].idade);
-		fseek(arq,5,1); fscanf(arq,"%f\n",&funcionarios[i].salario[0]);
-		fseek(arq,5,1); fscanf(arq,"%f\n",&funcionarios[i].salario[1]);
-		fseek(arq,7,1); fscanf(arq,"%f\n",&funcionarios[i].saliq);
+		for(int i=0;i<total;i++){
+		fseek(arq,6,1); fscanf(arq,"%s\n",func[i].nome);
+		fseek(arq,11,1); fscanf(arq,"%d\n",&func[i].cpf);
+		fseek(arq,6,1); fscanf(arq,"%s\n",func[i].sexo);
+		fseek(arq,7,1); fscanf(arq,"%d\n",&func[i].idade);
+		fseek(arq,5,1); fscanf(arq,"%f\n",&func[i].horas_trab);
+		fseek(arq,5,1); fscanf(arq,"%f\n",&func[i].val_hora);
+		fseek(arq,7,1); fscanf(arq,"%f\n",&func[i].saliq);
+		}
 	}
-   
-}
-fclose(arq);
+	fclose(arq);
     cout<<endl<<"Arquivo carregado com sucesso!"<<endl;
     system("pause");
     menu();
@@ -244,7 +239,6 @@ void menu_arq(){
 	getchar();
 	
 	switch(op){
-		
 		case 1:
 			salvar();
 		break;
@@ -267,55 +261,42 @@ void menu_arq(){
 }
 
 
-void media(){
+void saliq(){
 
 	int op, ZERO;
 
-	for(int i=0;i<MAX_ALUNOS;i++){
-		
-		if (alunos[i].notas[0]<alunos[i].notas[2] && alunos[i].notas[1]>alunos[i].notas[0]) 
-		{
-		alunos[i].media = (alunos[i].notas[1]+alunos[i].notas[2])/2;
+	for(int i=0;i<MAX_FUNC;i++){
+		if(func[i].sal_bruto<=1751.81){
+			func[i].saliq=func[i].sal_bruto*.92;
 		}
-		
-		else if (alunos[i].notas[1]<alunos[i].notas[2] && alunos[i].notas[0]>alunos[i].notas[1])
-		{
-		alunos[i].media = (alunos[i].notas[0]+alunos[i].notas[2])/2;	
+		else if(func[i].sal_bruto>=1751.82 && func[i].sal_bruto<=2919.72){
+			func[i].saliq=func[i].sal_bruto*.91;	
 		}
-	
-		else if (alunos[i].notas[0]>alunos[i].notas[2] && alunos[i].notas[1]>alunos[i].notas[2])
-		{
-			alunos[i].media = (alunos[i].notas[0]+alunos[i].notas[1])/2;
+		else if(func[i].sal_bruto>=2919.73 && func[i].sal_bruto<=5839.45){
+			func[i].saliq=func[i].sal_bruto*.89;
 		}
-		
-		else if (alunos[i].notas[0]==0 && alunos[i].notas[1]==0 && alunos[i].notas[2]==0)
-		{
-			alunos[i].media = 0;
+		else if(func[i].sal_bruto>5839.45){					//implementação do teto da alíquota do INSS
+			func[i].saliq=func[i].sal_bruto*.86;
 		}
-		else if(alunos[i].notas[0] == alunos[i].notas[1] && alunos[i].notas[0] == alunos[i].notas[2])
-		{
-			alunos[i].media = (alunos[i].notas[0]+alunos[i].notas[1])/2;
-		}
-	
 	}
 }
 
-void aprovados(){
+void sal_inf_500(){
 	int op;
 
 	system("cls");
-	media();
-	for(int i=0;i<MAX_ALUNOS;i++){
-		if(alunos[i].media >= 7){
+	saliq();
+	
+	for(int i=0;i<MAX_FUNC;i++){
+		if(func[i].saliq<500 && func[i].cpf!=0){
 			cout<<"-------------------------------"<<endl;
-			cout<<"Nome: "<<alunos[i].nome<<endl;
-			cout<<"Matrícula: "<<alunos[i].matricula<<endl;
-			cout<<"Sexo: "<<alunos[i].sexo<<endl;
-			cout<<"Idade: "<<alunos[i].idade<<endl;
-			cout<<"AV1: "<<alunos[i].notas[0]<<endl;
-			cout<<"AV2: "<<alunos[i].notas[1]<<endl;
-			cout<<"AV3: "<<alunos[i].notas[2]<<endl;
-			cout<<"Média: "<<alunos[i].media<<endl;
+			cout<<"Nome: "<<func[i].nome<<endl;
+			cout<<"CPF: "<<func[i].cpf<<endl;
+			cout<<"Sexo: "<<func[i].sexo<<endl;
+			cout<<"Idade: "<<func[i].idade<<endl;
+			cout<<"Horas trabalhadas: "<<func[i].horas_trab<<endl;
+			cout<<"Valor da hora trabalhada: R$"<<func[i].val_hora<<endl;
+			cout<<"Salário: R$"<<func[i].saliq<<endl;
 			cout<<endl<<"-------------------------------"<<endl<<endl;
 		}
 	}
@@ -342,22 +323,22 @@ void aprovados(){
 	}
 }
 
-void aprovados_7(){
+void sal_inf_1k(){
 	int op;
-	
+
 	system("cls");
-	media();
-	for(int i=0;i<MAX_ALUNOS;i++){
-		if(alunos[i].media >= 7 && alunos[i].media < 9){
+	saliq();
+	
+	for(int i=0;i<MAX_FUNC;i++){
+		if(func[i].saliq<1000 && func[i].cpf!=0){
 			cout<<"-------------------------------"<<endl;
-			cout<<"Nome: "<<alunos[i].nome<<endl;
-			cout<<"Matrícula: "<<alunos[i].matricula<<endl;
-			cout<<"Sexo: "<<alunos[i].sexo<<endl;
-			cout<<"Idade: "<<alunos[i].idade<<endl;
-			cout<<"AV1: "<<alunos[i].notas[0]<<endl;
-			cout<<"AV2: "<<alunos[i].notas[1]<<endl;
-			cout<<"AV3: "<<alunos[i].notas[2]<<endl;
-			cout<<"Média: "<<alunos[i].media<<endl;
+			cout<<"Nome: "<<func[i].nome<<endl;
+			cout<<"CPF: "<<func[i].cpf<<endl;
+			cout<<"Sexo: "<<func[i].sexo<<endl;
+			cout<<"Idade: "<<func[i].idade<<endl;
+			cout<<"Horas trabalhadas: "<<func[i].horas_trab<<endl;
+			cout<<"Valor da hora trabalhada: R$"<<func[i].val_hora<<endl;
+			cout<<"Salário: R$"<<func[i].saliq<<endl;
 			cout<<endl<<"-------------------------------"<<endl<<endl;
 		}
 	}
@@ -384,22 +365,22 @@ void aprovados_7(){
 	}
 }
 
-void aprovados_9(){
+void sal_sup_4k(){
 	int op;
-	
+
 	system("cls");
-	media();
-	for(int i=0;i<MAX_ALUNOS;i++){
-		if(alunos[i].media >= 9){
+	saliq();
+	
+	for(int i=0;i<MAX_FUNC;i++){
+		if(func[i].saliq>4000 && func[i].saliq<5000 && func[i].cpf!=0){
 			cout<<"-------------------------------"<<endl;
-			cout<<"Nome: "<<alunos[i].nome<<endl;
-			cout<<"Matrícula: "<<alunos[i].matricula<<endl;
-			cout<<"Sexo: "<<alunos[i].sexo<<endl;
-			cout<<"Idade: "<<alunos[i].idade<<endl;
-			cout<<"AV1: "<<alunos[i].notas[0]<<endl;
-			cout<<"AV2: "<<alunos[i].notas[1]<<endl;
-			cout<<"AV3: "<<alunos[i].notas[2]<<endl;
-			cout<<"Média: "<<alunos[i].media<<endl;
+			cout<<"Nome: "<<func[i].nome<<endl;
+			cout<<"CPF: "<<func[i].cpf<<endl;
+			cout<<"Sexo: "<<func[i].sexo<<endl;
+			cout<<"Idade: "<<func[i].idade<<endl;
+			cout<<"Horas trabalhadas: "<<func[i].horas_trab<<endl;
+			cout<<"Valor da hora trabalhada: R$"<<func[i].val_hora<<endl;
+			cout<<"Salário: R$"<<func[i].saliq<<endl;
 			cout<<endl<<"-------------------------------"<<endl<<endl;
 		}
 	}
@@ -427,23 +408,22 @@ void aprovados_9(){
 	}
 }
 
-void reprovados(){
+void sal_sup_igual_5k(){
 	int op;
-	
+
 	system("cls");
-	media();
+	saliq();
 	
-	for(int i=0;i<MAX_ALUNOS;i++){
-		if(alunos[i].media < 7 && alunos[i].ativo==1){
+	for(int i=0;i<MAX_FUNC;i++){
+		if(func[i].saliq>=5000 && func[i].saliq<7000 && func[i].cpf!=0){
 			cout<<"-------------------------------"<<endl;
-			cout<<"Nome: "<<alunos[i].nome<<endl;
-			cout<<"Matrícula: "<<alunos[i].matricula<<endl;
-			cout<<"Sexo: "<<alunos[i].sexo<<endl;
-			cout<<"Idade: "<<alunos[i].idade<<endl;
-			cout<<"AV1: "<<alunos[i].notas[0]<<endl;
-			cout<<"AV2: "<<alunos[i].notas[1]<<endl;
-			cout<<"AV3: "<<alunos[i].notas[2]<<endl;
-			cout<<"Média: "<<alunos[i].media<<endl;
+			cout<<"Nome: "<<func[i].nome<<endl;
+			cout<<"CPF: "<<func[i].cpf<<endl;
+			cout<<"Sexo: "<<func[i].sexo<<endl;
+			cout<<"Idade: "<<func[i].idade<<endl;
+			cout<<"Horas trabalhadas: "<<func[i].horas_trab<<endl;
+			cout<<"Valor da hora trabalhada: R$"<<func[i].val_hora<<endl;
+			cout<<"Salário: R$"<<func[i].saliq<<endl;
 			cout<<endl<<"-------------------------------"<<endl<<endl;
 		}
 	}
@@ -470,23 +450,22 @@ void reprovados(){
 	}
 }
 	
-void reprovados_7(){
+void sal_sup_igual_7k(){
 	int op;
-	
+
 	system("cls");
-	media();
+	saliq();
 	
-	for(int i=0;i<MAX_ALUNOS;i++){
-		if(alunos[i].media < 7 && alunos[i].media > 5){
+	for(int i=0;i<MAX_FUNC;i++){
+		if(func[i].saliq>=7000 && func[i].saliq<10000 && func[i].cpf!=0){
 			cout<<"-------------------------------"<<endl;
-			cout<<"Nome: "<<alunos[i].nome<<endl;
-			cout<<"Matrícula: "<<alunos[i].matricula<<endl;
-			cout<<"Sexo: "<<alunos[i].sexo<<endl;
-			cout<<"Idade: "<<alunos[i].idade<<endl;
-			cout<<"AV1: "<<alunos[i].notas[0]<<endl;
-			cout<<"AV2: "<<alunos[i].notas[1]<<endl;
-			cout<<"AV3: "<<alunos[i].notas[2]<<endl;
-			cout<<"Média: "<<alunos[i].media<<endl;
+			cout<<"Nome: "<<func[i].nome<<endl;
+			cout<<"CPF: "<<func[i].cpf<<endl;
+			cout<<"Sexo: "<<func[i].sexo<<endl;
+			cout<<"Idade: "<<func[i].idade<<endl;
+			cout<<"Horas trabalhadas: "<<func[i].horas_trab<<endl;
+			cout<<"Valor da hora trabalhada: R$"<<func[i].val_hora<<endl;
+			cout<<"Salário: R$"<<func[i].saliq<<endl;
 			cout<<endl<<"-------------------------------"<<endl<<endl;
 		}
 	}
@@ -513,23 +492,22 @@ void reprovados_7(){
 	}
 }
 
-void reprovados_5(){
+void sal_sup_igual_10k(){
 	int op;
-	
+
 	system("cls");
-	media();
+	saliq();
 	
-	for(int i=0;i<MAX_ALUNOS;i++){
-		if(alunos[i].media <= 5 && alunos[i].ativo==1){
+	for(int i=0;i<MAX_FUNC;i++){
+		if(func[i].saliq>=10000 && func[i].cpf!=0){
 			cout<<"-------------------------------"<<endl;
-			cout<<"Nome: "<<alunos[i].nome<<endl;
-			cout<<"Matrícula: "<<alunos[i].matricula<<endl;
-			cout<<"Sexo: "<<alunos[i].sexo<<endl;
-			cout<<"Idade: "<<alunos[i].idade<<endl;
-			cout<<"AV1: "<<alunos[i].notas[0]<<endl;
-			cout<<"AV2: "<<alunos[i].notas[1]<<endl;
-			cout<<"AV3: "<<alunos[i].notas[2]<<endl;
-			cout<<"Média: "<<alunos[i].media<<endl;
+			cout<<"Nome: "<<func[i].nome<<endl;
+			cout<<"CPF: "<<func[i].cpf<<endl;
+			cout<<"Sexo: "<<func[i].sexo<<endl;
+			cout<<"Idade: "<<func[i].idade<<endl;
+			cout<<"Horas trabalhadas: "<<func[i].horas_trab<<endl;
+			cout<<"Valor da hora trabalhada: R$"<<func[i].val_hora<<endl;
+			cout<<"Salário: R$"<<func[i].saliq<<endl;
 			cout<<endl<<"-------------------------------"<<endl<<endl;
 		}
 	}
@@ -559,71 +537,68 @@ void reprovados_5(){
 	
 void pesquisar(){
 	
-	int matricula, op, local, op1, op2;
-	bool coteli=false;
-	media();
+	int cpf, op, local, op1, op2;
+	bool cotelli=false;
+	saliq();
 	
 	system ("cls");
 	
-	cout<<endl<<"***********BUSCA DO ALUNO***********"<<endl;
+	cout<<endl<<"***********BUSCA DO FUNCIONÁRIO***********"<<endl;
 	cout<<"------------------------------------------------------------"<<endl;
-	cout<<"A busca deve ser feito pelo número de matrícula do aluno."<<endl; 
+	cout<<"A busca deve ser feito pelo número do CPF do funcionário."<<endl; 
 	cout<<"------------------------------------------------------------"<<endl;
 
-cout<<endl<<"Digite a matricula: "; cin>>matricula;
+	cout<<endl<<"Digite o CPF: "; cin>>cpf;
 
-for(int i=0;i<MAX_ALUNOS;i++){
-	if(matricula==alunos[i].matricula){
-		local=i;
-		coteli=true;
+	for(int i=0;i<MAX_FUNC;i++){
+		if(cpf==func[i].cpf){
+			local=i;
+			cotelli=true;
+		}
 	}
-}
-
-for(int i=0;i<MAX_ALUNOS;i++){
-	if (coteli == true && matricula==alunos[i].matricula && alunos[i].ativo==1) {
-		
-cout<<"-------------------------------"<<endl;
-			cout<<"Nome: "<<alunos[i].nome<<endl;
-			cout<<"Matrícula: "<<alunos[i].matricula<<endl;
-			cout<<"Sexo: "<<alunos[i].sexo<<endl;
-			cout<<"Idade: "<<alunos[i].idade<<endl;
-			cout<<"AV1: "<<alunos[i].notas[0]<<endl;
-			cout<<"AV2: "<<alunos[i].notas[1]<<endl;
-			cout<<"AV3: "<<alunos[i].notas[2]<<endl;
-			cout<<"Média: "<<alunos[i].media<<endl;
-cout<<endl<<"-------------------------------"<<endl<<endl;
-   
-   cout<<endl<<"1 - Nova pesquisa"<<endl;
-	cout<<"0 - Menu Principal"<<endl;
-	cout<<endl<<"Comando: ";	cin>>op;
-	getchar();
 	
-	switch(op){
+	for(int i=0;i<MAX_FUNC;i++){
+		if(cotelli==true && cpf==func[i].cpf && func[i].cpf==1) {
+			cout<<"-------------------------------"<<endl;
+			cout<<"Nome: "<<func[i].nome<<endl;
+			cout<<"CPF: "<<func[i].cpf<<endl;
+			cout<<"Sexo: "<<func[i].sexo<<endl;
+			cout<<"Idade: "<<func[i].idade<<endl;
+			cout<<"Horas trabalhadas: "<<func[i].horas_trab<<endl;
+			cout<<"Valor da hora trabalhada: R$"<<func[i].val_hora<<endl;
+			cout<<"Salário: R$"<<func[i].saliq<<endl;
+			cout<<endl<<"-------------------------------"<<endl<<endl;
+	   
+		   	cout<<endl<<"1 - Nova pesquisa"<<endl;
+			cout<<"0 - Menu Principal"<<endl;
+			cout<<endl<<"Comando: ";	cin>>op;
+			getchar();
+			
+			switch(op){
+				case 1:
+					pesquisar();
+				break;
+				
+				case 0:
+					menu();
+				break;
+				
+				default:
+					cout<<endl<<"Error! Comando inválido!"<<endl;
+					system("pause");
+					menu();
+		        break;
+			}	
+		} else if(cotelli==false && func[i].ativo==1){
+			cout<<endl<<"Funcionário não encontrado"<<endl;
 		
-		case 1:
-			pesquisar();
-		break;
-		
-		case 0:
-			menu();
-		break;
-		
-		default:
-			cout<<endl<<"Error! Comando inválido!"<<endl;
-			system("pause");
-			menu();
-        break;
-	}	
-
-	} else if (coteli==false && alunos[i].ativo==1){
-	cout<<endl<<"Aluno Não encontrado"<<endl;
-
-cout<<endl<<"Gostaria de cadastra-lo?"<<endl;
+			cout<<endl<<"Gostaria de cadastrá-lo?"<<endl;
 			cout<<endl<<"1 - Sim"<<endl;
 			cout<<"0 - Não"<<endl;
-			
+					
 			cout<<endl<<"Comando: "; cin>>op1;
 			getchar();
+			
 			switch(op1){
 				case 1:
 					cadastrar();
@@ -635,21 +610,19 @@ cout<<endl<<"Gostaria de cadastra-lo?"<<endl;
 			        cout<<"0 - Sair"<<endl;
 			        cout<<endl<<"Comando: "; cin>>op2;
 			        getchar();
-			switch(op2){
-				case 1:
-					pesquisar();
-			    break;
-			    
-			    case 0:
-			    	menu();
-			    break;
+			        
+				switch(op2){
+					case 1:
+						pesquisar();
+				    break;
+				    
+				    case 0:
+				    	menu();
+				    break;
+				}				
+			}
 		}
-					
 	}
-
-	}
-}
-
 }
 
 void menu_lista(){
@@ -658,46 +631,46 @@ void menu_lista(){
 	
 	do{
 		system("cls");
-		cout<<endl<<"*******SITUAÇÃO DOS ALUNOS CADASTRADOS********"<<endl;
+		cout<<endl<<"*******SITUAÇÃO DOS FUNCIONÁRIOS CADASTRADOS********"<<endl;
 		cout<<"----------------------------------------------------"<<endl;
-	   	cout<<"1 - Todos os Alunos"<<endl;	
-		cout<<"2 - Alunos Aprovados"<<endl;
-		cout<<"3 - Alunos Reprovados"<<endl;
-		cout<<"4 - Alunos reprovados com média inferior a 5"<<endl;
-		cout<<"5 - Alunos reprovados com média inferior a 7"<<endl;
-		cout<<"6 - Alunos aprovados com média superior ou igual a 7"<<endl;
-		cout<<"7 - Alunos aprovados com média superior ou igual a 9"<<endl;
+	   	cout<<"1 - Todos os Funcionários"<<endl;	
+		cout<<"2 - Funcionários com salário inferior a R$500"<<endl;
+		cout<<"3 - Funcionários com salário inferior a R$1000"<<endl;
+		cout<<"4 - Funcionários com salário superior a R$4000"<<endl;
+		cout<<"5 - Funcionários com salário superior ou igual a R$5000"<<endl;
+		cout<<"6 - Funcionários com salário superior ou igual a R$7000"<<endl;
+		cout<<"7 - Funcionários com salário superior ou igual a R$10 000"<<endl;
 	
 		cout<<"0 - Sair"<<endl<<endl;
 		cout<<"Comando: "; cin>>op_;
 		getchar();
 		switch(op_){
 			case 1:
-			   tds_alunos();
+			   tds_func();
 			break;
 			
 			case 2:
-				aprovados();
+				sal_inf_500();
 			break;
 			
 			case 3:
-				reprovados();
+				sal_inf_1k();
 			break;
 			
 			case 4:
-		         reprovados_5();
+		         sal_sup_4k();
 		    break;
 		    
 		    case 5:
-		    	reprovados_7();
+		    	sal_sup_igual_5k();
 		    break;
 		    
 		    case 6:
-		    	aprovados_7();
+		    	sal_sup_igual_7k();
 		    break;
 		    
 		    case 7:
-		    	aprovados_9();
+		    	sal_sup_igual_10k();
 		    break;
 		    
 			case 0:
@@ -714,29 +687,27 @@ void menu_lista(){
 
 }
 
-void tds_alunos(){
+void tds_func(){
 	
 	int op;
 	
 	system("cls");
-	media();
+	saliq();
 	
-	cout<<endl<<"***********LISTA DE ALUNOS CADASTRADOS***********"<<endl;
-		cout<<"-------------------------------"<<endl;
-    cout<<"Total de alunos: "<<total<<endl;
-    	cout<<"-------------------------------"<<endl;
+	cout<<endl<<"***********LISTA DE FUNCIONÁRIOS CADASTRADOS***********"<<endl;
+	cout<<"-------------------------------"<<endl;
+    cout<<"Total de funcionários: "<<total<<endl;
+    cout<<"-------------------------------"<<endl;
 
-	for(int i=0;i<MAX_ALUNOS;i++){
-		if(alunos[i].ativo==1){
-			cout<<"-------------------------------"<<endl;
-			cout<<"Nome: "<<alunos[i].nome<<endl;
-			cout<<"Matrícula: "<<alunos[i].matricula<<endl;
-			cout<<"Sexo: "<<alunos[i].sexo<<endl;
-			cout<<"Idade: "<<alunos[i].idade<<endl;
-			cout<<"AV1: "<<alunos[i].notas[0]<<endl;
-			cout<<"AV2: "<<alunos[i].notas[1]<<endl;
-			cout<<"AV3: "<<alunos[i].notas[2]<<endl;
-			cout<<"Média: "<<alunos[i].media<<endl;
+	for(int i=0;i<MAX_FUNC;i++){
+		if(func[i].ativo==1){
+			cout<<"Nome: "<<func[i].nome<<endl;
+			cout<<"CPF: "<<func[i].cpf<<endl;
+			cout<<"Sexo: "<<func[i].sexo<<endl;
+			cout<<"Idade: "<<func[i].idade<<endl;
+			cout<<"Horas trabalhadas: "<<func[i].horas_trab<<endl;
+			cout<<"Valor da hora trabalhada: R$"<<func[i].val_hora<<endl;
+			cout<<"Salário: R$"<<func[i].saliq<<endl;
 			cout<<endl<<"-------------------------------"<<endl<<endl;
 		}
 	}
