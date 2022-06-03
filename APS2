@@ -7,46 +7,47 @@
 
 using namespace std;
 
-typedef struct{
+typedef struct{  // Estrutura
 
 	char nome[50], sexo[10];
-	float horas_trab, val_hora, sal_bruto=horas_trab*val_hora, saliq; //horas trabalhadas, valor da hora trabalhada, salário bruto, salário líquido
+	float horas_trab, val_hora, sal_bruto=horas_trab*val_hora, saliq; //Horas trabalhadas, valor da hora trabalhada, salário bruto, salário líquido
 	int idade, cpf, ativo;
 
-}funcionario;
+}funcionario; //Nome do registro
 
-funcionario func[MAX_FUNC];
-int total = 0;
+funcionario func[MAX_FUNC]; //Limite do registro
 
-void menu();
-void cadastrar();
-void pesquisar();
-void menu_lista();
-void tds_func();
-void saliq();
-void sal_inf_500();
-void sal_inf_1k();
-void sal_sup_4k();
-void sal_sup_igual_5k();
-void sal_sup_igual_7k();
-void sal_sup_igual_10k();
-void salvar();
-void menu_arq();
-void carregar();
-void remover();
+int total = 0; char arq_name[15]; //Váriaveis globais
 
-main(){
+ //Funções
+void menu(); //Menu principal
+void cadastrar();//Função cadastrar
+void pesquisar();//Pesquisa de funcionários pel CPF
+void menu_lista();//Sub menu de listagem
+void tds_func();//Listagem de todos os funcionários
+void saliq();//Função para calcular o salário liquido
+void sal_inf_500();//Listagem de todos os funcionários com salário inferior a 500R$
+void sal_inf_1k();//Listagem de todos os funcionários com salário inferior a 1000R$
+void sal_sup_4k();//Listagem de todos os funcionários com salário superior a 4000R$
+void sal_sup_igual_5k();//Listagem de todos os funcionários com salário superior ou igual a 5000R$
+void sal_sup_igual_7k();//Listagem de todos os funcionários com salário superior ou igual a 7000R$
+void sal_sup_igual_10k();//Listagem de todos os funcionários com salário superior ou igual a 10.000R$
+void menu_arq();//Sub menu para manipulação de arquivos externos
+void save_arq();//Salvar arquivos externos
+void upload_arq();//Carregar arquivo externo;
+
+main(){  //Programa principal  
 	
-	setlocale(LC_ALL, "Portuguese");
+	setlocale(LC_ALL, "Portuguese"); //Permitir caracteres usados na língua portuguesa
 		
 	menu();
 		
 	return 0;
 }
 
-void menu(){
+void menu(){ //Estrutura do menu
 
-	int op;
+	int op; //Variável de operação
 	
 	do{
 		system("cls");
@@ -54,8 +55,7 @@ void menu(){
 		cout<<endl<<"1 - Cadastrar Funcionário"<<endl;
 		cout<<"2 - Pesquisar Funcionário"<<endl;
 		cout<<"3 - Listar Funcionários"<<endl;
-		cout<<"4 - Remover Funcionário"<<endl;
-		cout<<"5 - Salvar/Carregar arquivo externo"<<endl;
+		cout<<"4 - Salvar/Carregar arquivo externo"<<endl;
 		
 		cout<<"0 - Encerrar o Programa"<<endl<<endl;
 		cout<<"Comando: "; cin>>op;
@@ -75,10 +75,6 @@ void menu(){
 			break;
 			
 			case 4:
-				remover();
-			break;
-			
-			case 5:
 				menu_arq();
 			break;
 			
@@ -96,15 +92,10 @@ void menu(){
 	}while(op!=0);
 }
 
-void remover(){
-
-}
-
-
-void cadastrar(){
+void cadastrar(){ //Estrutura do cadastro
 
 	system("cls");
-
+     //Variáveis do registro
 	char nome[50], sexo[10];
 	float horas_trab, val_hora, sal_bruto, saliq;
     int cpf, idade, ativo, op;
@@ -120,7 +111,7 @@ void cadastrar(){
 		
 		sal_bruto=horas_trab*val_hora;
 
-		for(int i=0;i<MAX_FUNC; i++){
+		for(int i=0;i<MAX_FUNC; i++){    //Salvando os dados no registro
 			if(func[i].ativo==0){
 				func[i].horas_trab = horas_trab;
 				func[i].val_hora = val_hora;
@@ -159,78 +150,15 @@ void cadastrar(){
 	getchar();
 }
 
-void salvar(){
-	char name[10]; 
-	saliq();
-	
-	FILE* arq;
-	
-	cout<<endl<<"Informe o nome para o arquivo: "; cin>>name; strcat(name,".txt");
-	if((arq=fopen(name,"w"))==NULL){
-		cout<<endl<<"Não foi possível abrir o arquivo"<<endl; exit(1);
-	}else{
-	
-	fprintf (arq,"Total= %d\n",total);
-	
-	for(int i=0;i<total;i++){
-		fprintf (arq, "\nNome= %s",func[i].nome);
-		fprintf (arq, "\nCPF= %d",func[i].cpf);	
-		fprintf (arq, "\nSexo= %s",func[i].sexo);
-		fprintf (arq, "\nIdade= %d",func[i].idade);
-		fprintf (arq, "\nHoras Trabalhadas= %.1f",func[i].horas_trab);
-		fprintf (arq, "\nValor da hora trabalhada= %.1f",func[i].val_hora);
-		fprintf (arq, "\nSalário Líquido= %.1f",func[i].saliq);
-	}
-	cout<<endl<<"Arquivo criado com sucesso!"<<endl; fclose(arq);
-	system("pause");
-	}
-}
-
-void carregar(){
-	
-	FILE *arq;
-	char name[10];
-	saliq();
-	
-	cout<<endl<<"-----------------------------------------------------------------------"<<endl;
-	cout<<"O arquivo que será carregado deve estar no mesmo diretório do sistema"<<endl; 
-	cout<<"-----------------------------------------------------------------------"<<endl;
-   
-	cout<<endl<<"Nome do arquivo a ser carregado: "; cin>>name;
-	arq = fopen(name,"r");
-	if (arq == NULL){
-		cout<<endl<<"Não foi possível carregar o arquivo"<<endl;
-	}else{
-	    fseek (arq,7,0);
-		fscanf (arq, "%d\n", &total);
-		
-		for(int i=0;i<total;i++){
-		fseek(arq,6,1); fscanf(arq,"%s\n",func[i].nome);
-		fseek(arq,11,1); fscanf(arq,"%d\n",&func[i].cpf);
-		fseek(arq,6,1); fscanf(arq,"%s\n",func[i].sexo);
-		fseek(arq,7,1); fscanf(arq,"%d\n",&func[i].idade);
-		fseek(arq,5,1); fscanf(arq,"%f\n",&func[i].horas_trab);
-		fseek(arq,5,1); fscanf(arq,"%f\n",&func[i].val_hora);
-		fseek(arq,7,1); fscanf(arq,"%f\n",&func[i].saliq);
-		}
-	}
-	fclose(arq);
-    cout<<endl<<"Arquivo carregado com sucesso!"<<endl;
-    system("pause");
-    menu();
-   	
-}
-
-
-void menu_arq(){
+void menu_arq(){//Sub menu de arquivos
 	int op;
 	
 	system("cls");
 	
-	cout<<endl<<"***********Arquivo externo***********"<<endl;
-	cout<<"------------------------------------------------------------"<<endl;
+	cout<<endl<<"SALVAR/CARREGAR UM ARQUIVO EXTERNO"<<endl;
+	cout<<"---------------------------------------"<<endl;
 	cout<<"Lembre-se de salvar ao fim da execução"<<endl; 
-	cout<<"------------------------------------------------------------"<<endl;
+	cout<<"---------------------------------------"<<endl;
 	
 	cout<<endl<<"1 - Salvar arquivo"<<endl;
 	cout<<"2 - Carregar arquivo"<<endl;
@@ -239,12 +167,13 @@ void menu_arq(){
 	getchar();
 	
 	switch(op){
+		
 		case 1:
-			salvar();
+			save_arq();
 		break;
 		
 		case 2:
-			carregar();
+			upload_arq();
 		break;
 		
 		case 0:
@@ -257,11 +186,83 @@ void menu_arq(){
 			menu();
         break;
 	}	
+}
+
+void save_arq(){//Estrutura para salvar arquivos externos
+
+
+	saliq();
+	
+	FILE* arq;
+	
+	cout<<endl<<"Digite um nome para o arquivo: "; cin>>arq_name; strcat(arq_name,".txt");
+	if((arq=fopen(arq_name,"w"))==NULL){
+		cout<<endl<<"não foi possível abrir o arquivo"<<endl;
+	}else{
+	
+	fprintf (arq,"Total= %d\n",total);
+	
+	for(int i=0;i<total;i++){
+		
+		fprintf (arq, "\nNome= %s",func[i].nome);
+		fprintf (arq, "\nCPF= %d",func[i].cpf);	
+		fprintf (arq, "\nSexo= %s",func[i].sexo);
+		fprintf (arq, "\nIdade= %d",func[i].idade);
+		fprintf (arq, "\nHoras Trabalhadas= %.1f",func[i].horas_trab);
+		fprintf (arq, "\nValor da hora trabalhada= %.1f",func[i].val_hora);
+		fprintf (arq, "\nSalário Líquido= %.1f",func[i].saliq);
+	}
+	cout<<endl<<"Arquivo criado com sucesso!"<<endl; fclose(arq);
+	cout<<"Você será redirecionado ao menu principal"<<endl;
+    cout<<" "<<endl;
+    system("pause");
+	
+}
+}
+
+void upload_arq(){//Estrutura para carregar arquivos externos
+	
+FILE *arq;
+   
+	cout<<endl<<"-----------------------------------------------------------------------"<<endl;
+	cout<<"O arquivo que será carregado deve estar no mesmo diretório do sistema"<<endl; 
+	cout<<"-----------------------------------------------------------------------"<<endl;
+	cout<<"Lembre-se de adicionar a extensão '.txt' junto do nome do programa"<<endl; 
+	cout<<"-----------------------------------------------------------------------"<<endl;
+   
+   cout<<endl<<"Digite o nome do arquivo: "; cin>>arq_name;
+   arq = fopen(arq_name,"r");
+   if (arq == NULL){
+   	cout<<endl<<"não foi possível carregar o arquivo"<<endl;
+   }else{
+   	    fseek (arq,7,0);
+		fscanf (arq, "%d\n", &total);
+		
+	for(int i=0;i<total;i++){
+	for(int i=0;i<total;i++){
+		fseek(arq,6,1); fscanf(arq,"%s\n",func[i].nome);
+		fseek(arq,11,1); fscanf(arq,"%d\n",&func[i].cpf);
+		fseek(arq,6,1); fscanf(arq,"%s\n",func[i].sexo);
+		fseek(arq,7,1); fscanf(arq,"%d\n",&func[i].idade);
+		fseek(arq,5,1); fscanf(arq,"%f\n",&func[i].horas_trab);
+		fseek(arq,5,1); fscanf(arq,"%f\n",&func[i].val_hora);
+		fseek(arq,7,1); fscanf(arq,"%f\n",&func[i].saliq);
+		}
+	
+   
+}
+}
+
+fclose(arq);
+    
+	cout<<endl<<"Arquivo carregado com sucesso!"<<endl;
+	cout<<endl<<"Você será redirecionado ao menu principal"<<endl;
+    cout<<" "<<endl;
+    	system("pause");
 	
 }
 
-
-void saliq(){
+void saliq(){//Estrutura lógica do sistema de salário baseado na implementação do teto da alíquota do INSS
 
 	int op, ZERO;
 
@@ -281,7 +282,7 @@ void saliq(){
 	}
 }
 
-void sal_inf_500(){
+void sal_inf_500(){//Estrutura de exibição dos funcionários com salário inferior a 500R$
 	int op;
 
 	system("cls");
@@ -323,7 +324,7 @@ void sal_inf_500(){
 	}
 }
 
-void sal_inf_1k(){
+void sal_inf_1k(){//Estrutura de exibição dos funcionários com salário inferior a 1000R$
 	int op;
 
 	system("cls");
@@ -365,7 +366,7 @@ void sal_inf_1k(){
 	}
 }
 
-void sal_sup_4k(){
+void sal_sup_4k(){//Estrutura de exibição dos funcionários com salário superior a 4000R$
 	int op;
 
 	system("cls");
@@ -408,7 +409,7 @@ void sal_sup_4k(){
 	}
 }
 
-void sal_sup_igual_5k(){
+void sal_sup_igual_5k(){ //Estrutura de exibição dos funcionários com salário superior ou igual a 5000R$
 	int op;
 
 	system("cls");
@@ -450,7 +451,7 @@ void sal_sup_igual_5k(){
 	}
 }
 	
-void sal_sup_igual_7k(){
+void sal_sup_igual_7k(){//Estrutura de exibição dos funcionários com salário superior ou igual a 7000R$
 	int op;
 
 	system("cls");
@@ -492,7 +493,7 @@ void sal_sup_igual_7k(){
 	}
 }
 
-void sal_sup_igual_10k(){
+void sal_sup_igual_10k(){//Estrutura de exibição dos funcionários com salário superior ou igual a 10.000R$
 	int op;
 
 	system("cls");
@@ -535,8 +536,8 @@ void sal_sup_igual_10k(){
 	
 }
 	
-void pesquisar(){
-	
+void pesquisar(){//Estrutura para buscar registros
+		
 	int cpf, op, local, op1, op2;
 	bool cotelli=false;
 	saliq();
@@ -550,16 +551,40 @@ void pesquisar(){
 
 	cout<<endl<<"Digite o CPF: "; cin>>cpf;
 
-	for(int i=0;i<MAX_FUNC;i++){
-		if(cpf==func[i].cpf){
-			local=i;
-			cotelli=true;
-		}
+	if(total==0){
+  cout<<endl<<"Sistema vazio"<<endl;
+  
+  cout<<endl<<"Gostaria de cadastrar um novo funcionário?"<<endl;
+  cout<<endl<<"1 - Cadastrar novo funcionário"<<endl;
+  cout<<"0 - Menu Principal"<<endl;
+  
+  cout<<endl<<"Comando: "; cin>>op1;
+  switch(op1){
+  	case 1:
+  		cadastrar();
+  	break;
+  	
+  	case 0:
+  		menu();
+  	break;
+  	
+}
+  
+  
+}else{
+
+
+for(int i=0;i<MAX_FUNC;i++){
+	if(cpf==func[i].cpf){
+		local=i;
+		cotelli=true;
 	}
-	
-	for(int i=0;i<MAX_FUNC;i++){
-		if(cotelli==true && cpf==func[i].cpf && func[i].cpf==1) {
-			cout<<"-------------------------------"<<endl;
+}
+
+for(int i=0;i<MAX_FUNC;i++){
+	if (cotelli == true && cpf==func[i].cpf) {
+		
+cout<<"-------------------------------"<<endl;
 			cout<<"Nome: "<<func[i].nome<<endl;
 			cout<<"CPF: "<<func[i].cpf<<endl;
 			cout<<"Sexo: "<<func[i].sexo<<endl;
@@ -567,38 +592,39 @@ void pesquisar(){
 			cout<<"Horas trabalhadas: "<<func[i].horas_trab<<endl;
 			cout<<"Valor da hora trabalhada: R$"<<func[i].val_hora<<endl;
 			cout<<"Salário: R$"<<func[i].saliq<<endl;
-			cout<<endl<<"-------------------------------"<<endl<<endl;
-	   
-		   	cout<<endl<<"1 - Nova pesquisa"<<endl;
-			cout<<"0 - Menu Principal"<<endl;
-			cout<<endl<<"Comando: ";	cin>>op;
-			getchar();
+cout<<endl<<"-------------------------------"<<endl<<endl;
 			
-			switch(op){
-				case 1:
-					pesquisar();
-				break;
-				
-				case 0:
-					menu();
-				break;
-				
-				default:
-					cout<<endl<<"Error! Comando inválido!"<<endl;
-					system("pause");
-					menu();
-		        break;
-			}	
-		} else if(cotelli==false && func[i].ativo==1){
-			cout<<endl<<"Funcionário não encontrado"<<endl;
+   cout<<"1 - Nova pesquisa"<<endl;
+	cout<<"0 - Menu Principal"<<endl;
+	cout<<endl<<"Comando: ";	cin>>op;
+	getchar();
+	
+	switch(op){
 		
-			cout<<endl<<"Gostaria de cadastrá-lo?"<<endl;
+		case 1:
+			pesquisar();
+		break;
+		
+		case 0:
+			menu();
+		break;
+		
+		default:
+			cout<<endl<<"Error! Comando inválido!"<<endl;
+			system("pause");
+			menu();
+        break;
+}	
+
+} else if (cotelli==false){
+	cout<<endl<<"Funcionário não encontrado"<<endl;
+
+cout<<endl<<"Gostaria de cadastra-lo?"<<endl;
 			cout<<endl<<"1 - Sim"<<endl;
 			cout<<"0 - Não"<<endl;
-					
+			
 			cout<<endl<<"Comando: "; cin>>op1;
 			getchar();
-			
 			switch(op1){
 				case 1:
 					cadastrar();
@@ -607,25 +633,27 @@ void pesquisar(){
 				case 0:
 					cout<<endl<<"Gostaria de continuar pesquisando?"<<endl;
 					cout<<endl<<"1 - Nova pesquisa"<<endl;
-			        cout<<"0 - Sair"<<endl;
+			        cout<<"0 - Retornar ao menu principal"<<endl;
 			        cout<<endl<<"Comando: "; cin>>op2;
 			        getchar();
-			        
-				switch(op2){
-					case 1:
-						pesquisar();
-				    break;
-				    
-				    case 0:
-				    	menu();
-				    break;
-				}				
-			}
-		}
-	}
+			switch(op2){
+				case 1:
+					pesquisar();
+			    break;
+			    
+			    case 0:
+			    	menu();
+			    break;
+}
+					
 }
 
-void menu_lista(){
+}
+}
+}
+}
+
+void menu_lista(){ //Menu de listagem
 	
 	int op_;
 	
@@ -687,7 +715,7 @@ void menu_lista(){
 
 }
 
-void tds_func(){
+void tds_func(){ //Estrutura de exibição de todos os funcionários
 	
 	int op;
 	
