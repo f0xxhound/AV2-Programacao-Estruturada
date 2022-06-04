@@ -1,3 +1,9 @@
+/*
+Atividade Prática Supervisionada 2 (APS2) - Unicarioca [955 - PROGRAMAÇÃO ESTRUTURADA 2022/1]
+Exercicio - Sistema de Cadastro de Funcionário
+Professor: Andre Cotelli Do Espirito Santo
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
