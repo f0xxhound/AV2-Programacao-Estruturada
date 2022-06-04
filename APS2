@@ -11,7 +11,8 @@ typedef struct{  // Estrutura
 
 	char nome[50], sexo[10];
 	float horas_trab, val_hora, sal_bruto=horas_trab*val_hora, saliq; //Horas trabalhadas, valor da hora trabalhada, salário bruto, salário líquido
-	int idade, cpf, ativo;
+	int idade, ativo;
+	long long cpf; //Variável int de 64 bits para registrar os 11 dígitos do CPF
 
 }funcionario; //Nome do registro
 
@@ -98,7 +99,8 @@ void cadastrar(){ //Estrutura do cadastro
      //Variáveis do registro
 	char nome[50], sexo[10];
 	float horas_trab, val_hora, sal_bruto, saliq;
-    int cpf, idade, ativo, op;
+    int idade, ativo, op;
+    long long cpf;
 	
 	do{
 		cout<<endl<<"---Cadastro de Funcionário---"<<endl;
@@ -538,7 +540,8 @@ void sal_sup_igual_10k(){//Estrutura de exibição dos funcionários com salári
 	
 void pesquisar(){//Estrutura para buscar registros
 		
-	int cpf, op, local, op1, op2;
+	int op, local, op1, op2;
+	long long cpf;
 	bool cotelli=false;
 	saliq();
 	
@@ -552,23 +555,23 @@ void pesquisar(){//Estrutura para buscar registros
 	cout<<endl<<"Digite o CPF: "; cin>>cpf;
 
 	if(total==0){
-  cout<<endl<<"Sistema vazio"<<endl;
-  
-  cout<<endl<<"Gostaria de cadastrar um novo funcionário?"<<endl;
-  cout<<endl<<"1 - Cadastrar novo funcionário"<<endl;
-  cout<<"0 - Menu Principal"<<endl;
-  
-  cout<<endl<<"Comando: "; cin>>op1;
-  switch(op1){
-  	case 1:
-  		cadastrar();
-  	break;
-  	
-  	case 0:
-  		menu();
-  	break;
-  	
-}
+	  cout<<endl<<"Sistema vazio"<<endl;
+	  
+	  cout<<endl<<"Gostaria de cadastrar um novo funcionário?"<<endl;
+	  cout<<endl<<"1 - Cadastrar novo funcionário"<<endl;
+	  cout<<"0 - Menu Principal"<<endl;
+	  
+	  cout<<endl<<"Comando: "; cin>>op1;
+	  switch(op1){
+	  	case 1:
+	  		cadastrar();
+	  	break;
+	  	
+	  	case 0:
+	  		menu();
+	  	break;
+	  	
+	}
   
   
 }else{
